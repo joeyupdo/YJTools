@@ -39,7 +39,7 @@ import java.util.Set;
  * 需要在Application中注册，为了要在程序启动器就监控整个程序。
  */
 public class CrashHelper implements Thread.UncaughtExceptionHandler {
-    private final static String TAG = "CrashHandler";
+    private final static String TAG = "CrashHelper";
     @SuppressLint("StaticFieldLeak")
     private final static DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.US);
 
@@ -150,7 +150,7 @@ public class CrashHelper implements Thread.UncaughtExceptionHandler {
             infoStr.append(info.key);
             infoStr.append(": ");
             infoStr.append(info.value);
-            infoStr.append("\n");
+            infoStr.append("\r\n");
         }
         if (null != builder.logFilePrefix) {
             String time = formatter.format(new Date());
