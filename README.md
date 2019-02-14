@@ -18,7 +18,7 @@
 	
 2. Add the dependency:
 	dependencies {
-		implememtation 'com.gitee.amused:YJTools:v1.0.3'
+		implementation 'com.github.joeyupdo:YJTools:v1.0.0'
 	}
 
 #### 使用说明
