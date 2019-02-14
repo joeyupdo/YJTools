@@ -164,14 +164,13 @@ public class CrashHelper implements Thread.UncaughtExceptionHandler {
             fos.write(infoStr.toString().getBytes());
             fos.close();
             if (null != builder.onCrashListener) {
-                builder.onCrashListener.onCrash(crashInfos, infoStr);
-                builder.onCrashListener.onCrash(log);
+                builder.onCrashListener.onCrash(log, crashInfos, infoStr);
             } else {
                 Log.e(TAG, infoStr.toString());
             }
         } else {
             if (null != builder.onCrashListener) {
-                builder.onCrashListener.onCrash(crashInfos, infoStr);
+                builder.onCrashListener.onCrash(null, crashInfos, infoStr);
             }
         }
     }

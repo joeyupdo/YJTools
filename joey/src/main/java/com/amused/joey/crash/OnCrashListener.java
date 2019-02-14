@@ -10,6 +10,5 @@ import java.util.List;
  * Description:
  */
 public interface OnCrashListener {
-    public void onCrash(List<AppCrashInfo> crashData, StringBuilder crashInfo);
-    public void onCrash(File crashLog);
+    public void onCrash(File crashLog, List<AppCrashInfo> crashData, StringBuilder crashInfo);
 }

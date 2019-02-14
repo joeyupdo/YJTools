@@ -3,7 +3,6 @@ package com.amused.joey.email;
 import com.amused.joey.mainkit.MainThreadKit;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
 
@@ -31,12 +30,20 @@ public class YJEmail {
         this.builder = builder;
     }
 
+    public void sendHtml(final String title, final String content, final String[] pathNames) {
+        _send(title, new EmailContent(true, content), pathNames);
+    }
+
     /**
      * @param title  邮件的标题
      * @param content 邮件的文本内容
      * @param pathNames  附件的路径列表，没有可填空
      */
-    public void send(final String title, final String content, final String[] pathNames) {
+    public void sendText(final String title, final String content, final String[] pathNames) {
+        _send(title, new EmailContent(false, content), pathNames);
+    }
+
+    private void _send(final String title, final EmailContent content, final String[] pathNames) {
         try {
             final Message message = initMessage(title, content, pathNames);
             // 发送邮件
@@ -85,13 +92,13 @@ public class YJEmail {
     /**
      * 创建发送消息体
      * @param title
-     * @param content
+     * @param emailContent
      * @param pathNames
      * @return
      * @throws IOException
      * @throws MessagingException
      */
-    private Message initMessage(String title, String content, String[] pathNames) throws IOException, MessagingException {
+    private Message initMessage(String title, EmailContent emailContent, String[] pathNames) throws IOException, MessagingException {
         // 根据邮件会话属性和密码验证器构造一个发送邮件的session
         Properties properties = getProperties();
         MailAuthenticator mailAuthenticator = new MailAuthenticator(builder.fromUser, builder.fromPassword);
@@ -112,7 +119,7 @@ public class YJEmail {
         // 创建一个包含邮件内容的MimeBodyPart
         BodyPart contentPart = new MimeBodyPart();
         // 设置内容
-        contentPart.setContent(content, "text/html; charset=utf-8");
+        contentPart.setContent(emailContent.content, "text/" + (emailContent.isHtml? "html": "plain") + "; charset=utf-8");
         multipart.addBodyPart(contentPart);
         if (null != pathNames) {
             for (String pathName : pathNames) {
