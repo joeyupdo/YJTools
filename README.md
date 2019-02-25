@@ -18,7 +18,7 @@
 	
 2. Add the dependency:
 	dependencies {
-		implementation 'com.github.joeyupdo:YJTools:v1.0.3'
+		implementation 'com.github.joeyupdo:YJTools:v1.0.4'
 	}
 
 #### 使用说明
