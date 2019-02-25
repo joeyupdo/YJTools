@@ -18,7 +18,7 @@
 	
 2. Add the dependency:
 	dependencies {
-		implementation 'com.github.joeyupdo:YJTools:v1.0.2'
+		implementation 'com.github.joeyupdo:YJTools:v1.0.3'
 	}
 
 #### 使用说明
@@ -29,6 +29,7 @@
 5. DelayTimer：使用Handler实现的一个定时器，可以执行定时任务
 6. ResourceContentType：给定一个文件，判断是图片还是GIF动图
 7. YJEmail: 发送邮件工具类，可方便发送邮件
+8. CircularList: 双向循环列表
 
 #### 参与贡献
 

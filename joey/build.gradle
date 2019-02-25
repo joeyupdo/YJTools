@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+group='com.github.joeyupdo'
 
 android {
     compileSdkVersion 28
@@ -23,6 +25,10 @@ android {
     packagingOptions {
         pickFirst 'META-INF/*' // picks the JavaMail license file
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -34,6 +40,6 @@ dependencies {
     // e-mail
     implementation 'com.sun.mail:android-mail:1.6.0'
     implementation 'com.sun.mail:android-activation:1.6.0'
-    configurations {    all*.exclude group: 'javax.activation', module: 'activation'}
+    configurations { all*.exclude group: 'javax.activation', module: 'activation' }
     // local jar
 }

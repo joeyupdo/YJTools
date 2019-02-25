@@ -28,12 +28,9 @@ public class DelayTimer {
      */
     public static void timer(final Runnable task, final long delay) {
         checkHandler();
-        if (null == tasks.putIfAbsent(getTaskKey(task), new Runnable() {
-            @Override
-            public void run() {
-                task.run();
-                tasks.remove(getTaskKey(task));
-            }
+        if (null == tasks.putIfAbsent(getTaskKey(task), () -> {
+            task.run();
+            tasks.remove(getTaskKey(task));
         })) {
             handler.get().postDelayed(tasks.get(getTaskKey(task)), delay);
         }
@@ -47,12 +44,9 @@ public class DelayTimer {
      */
     public static void interval(final Runnable task, final long delay, final long interval) {
         checkHandler();
-        if (null == tasks.putIfAbsent(getTaskKey(task), new Runnable() {
-            @Override
-            public void run() {task.run();
-                if (interval > 0) {
-                    handler.get().postDelayed(tasks.get(getTaskKey(task)), interval);
-                }
+        if (null == tasks.putIfAbsent(getTaskKey(task), () -> {task.run();
+            if (interval > 0) {
+                handler.get().postDelayed(tasks.get(getTaskKey(task)), interval);
             }
         })) {
             handler.get().postDelayed(tasks.get(getTaskKey(task)), delay);
@@ -92,12 +86,7 @@ public class DelayTimer {
     private static void checkHandler() {
         if (null == handler.get()) {
             try {
-                MainThreadKit.runOnSync(new Runnable() {
-                    @Override
-                    public void run() {
-                        handler.compareAndSet(null, new Handler());
-                    }
-                }, 1000);
+                MainThreadKit.runOnSync(() -> handler.compareAndSet(null, new Handler()), 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

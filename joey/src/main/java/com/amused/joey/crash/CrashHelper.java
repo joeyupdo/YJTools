@@ -58,6 +58,13 @@ public class CrashHelper implements Thread.UncaughtExceptionHandler {
         Thread.setDefaultUncaughtExceptionHandler(this);
     }
 
+    public void addCrashInfosAppend(String key, String value) {
+        if (null == builder.crashInfosAppend) {
+            builder.crashInfosAppend = new ArrayList<>();
+        }
+        builder.crashInfosAppend.add(new AppCrashInfo(key, value));
+    }
+
     /* 当UncaughtException发生时会转入该函数来处理 */
     @Override
     public void uncaughtException(Thread thread, Throwable throwable) {

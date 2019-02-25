@@ -10,5 +10,11 @@ import java.util.List;
  * Description:
  */
 public interface OnCrashListener {
+    /**
+     * 当发生崩溃时触发，注意：crashLog可能为空
+     * @param crashLog
+     * @param crashData
+     * @param crashInfo
+     */
     public void onCrash(File crashLog, List<AppCrashInfo> crashData, StringBuilder crashInfo);
 }

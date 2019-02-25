@@ -17,15 +17,12 @@ public class UiToast {
     public static void showMessage(final Context context, final String message, final boolean lenLong) {
         synchronized (UiToast.class) {
             try {
-                MainThreadKit.runOnAsync(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (null != toast) {
-                            toast.cancel();
-                        }
-                        toast = Toast.makeText(context, message, lenLong? Toast.LENGTH_LONG: Toast.LENGTH_SHORT);
-                        toast.show();
+                MainThreadKit.runOnAsync(() -> {
+                    if (null != toast) {
+                        toast.cancel();
                     }
+                    toast = Toast.makeText(context, message, lenLong? Toast.LENGTH_LONG: Toast.LENGTH_SHORT);
+                    toast.show();
                 });
             } catch (InterruptedException e) {
                 e.printStackTrace();
