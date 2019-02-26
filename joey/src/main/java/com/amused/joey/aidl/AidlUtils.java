@@ -19,98 +19,100 @@ import java.util.concurrent.TimeUnit;
  * Description:
  */
 public class AidlUtils {
+    private CountDownLatch countDownLatch = new CountDownLatch(1);
+    private Builder builder;
+    private IBinder iBinder;
+    private ServiceConnection connection;
 
-    private AidlUtils() {}
+    private AidlUtils(Builder builder) { this.builder = builder; }
 
-    public static class Builder<T> {
-        private CountDownLatch countDownLatch = new CountDownLatch(1);
+    @SuppressWarnings("unchecked")
+    public Object getObject() throws InterruptedException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            throw new RuntimeException("Can\'t runing in the main thread !");
+        }
+        if (null == builder.clazz) {
+            throw new IllegalArgumentException("Clazz can not be null !");
+        }
+        Intent intent = initIntent();
+        connection = initConnection();
+        builder.context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        countDownLatch.await((builder.timeout > 0)? builder.timeout: 3000, TimeUnit.MILLISECONDS);
+        if (null == iBinder) {
+            throw new RuntimeException("Get IBinder is null !");
+        }
+        Class<?> stub = Class.forName(builder.clazz.getName() + "$Stub");
+        Method asInterface = stub.getMethod("asInterface", IBinder.class);
+        return asInterface.invoke(stub, iBinder);
+    }
 
+    public void disconnected() {
+        if (null != connection) {
+            builder.context.unbindService(connection);
+            connection = null;
+        }
+    }
+
+    private Intent initIntent() {
+        if (null == builder.action) {
+            throw new IllegalArgumentException("Action can not be null !");
+        }
+        Intent intent = new Intent(builder.action);
+        if (null != builder.toPackageName) {
+            intent.setPackage(builder.toPackageName);
+        }
+        return intent;
+    }
+
+    private ServiceConnection initConnection() {
+        return new ServiceConnection() {
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                builder.context.unbindService(this);
+            }
+
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                iBinder = service;
+                countDownLatch.countDown();
+            }
+        };
+    }
+
+    public static class Builder {
         private Context context;
         private String action;
         private String toPackageName;
         private long timeout;
         private Class<?> clazz;
 
-        private IBinder iBinder;
-
         public Builder(Context context) {
             this.context = context;
         }
 
-        public Builder<T> setAction(String action) {
+        public Builder setAction(String action) {
             this.action = action;
             return this;
         }
 
-        public Builder<T> setToPackageName(String toPackageName) {
+        public Builder setToPackageName(String toPackageName) {
             this.toPackageName = toPackageName;
             return this;
         }
 
-        public Builder<T> setTimeout(long timeout) {
+        public Builder setTimeout(long timeout) {
             this.timeout = timeout;
             return this;
         }
 
-        public Builder<T> setClazz(Class<?> clazz){
+        public Builder setClazz(Class<?> clazz){
             this.clazz = clazz;
             return this;
         }
 
-        @SuppressWarnings("unchecked")
-        public T build() throws InterruptedException, ClassNotFoundException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, IllegalAccessException {
-            if (Looper.myLooper() == Looper.getMainLooper()) {
-                throw new RuntimeException("Can\'t runing in the main thread !");
-            }
-            if (null == clazz) {
-                throw new IllegalArgumentException("Clazz can not be null !");
-            }
-            Intent intent = initIntent();
-            ServiceConnection connection = initConnection();
-            initBinder(intent, connection);
-            if (null == iBinder) {
-                throw new RuntimeException("Get IBinder is null !");
-            }
-            Class<?> stub = Class.forName(clazz.getName() + "$Stub");
-            Method asInterface = stub.getMethod("asInterface", IBinder.class);
-            return (T) asInterface.invoke(stub, iBinder);
-        }
-
-        private Intent initIntent() {
-            if (null == action) {
-                throw new IllegalArgumentException("Action can not be null !");
-            }
-            Intent intent = new Intent(action);
-            if (null != toPackageName) {
-                intent.setPackage(toPackageName);
-            }
-            return intent;
-        }
-
-        private ServiceConnection initConnection() {
-            ServiceConnection conn = new ServiceConnection() {
-
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    context.unbindService(this);
-                }
-
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    iBinder = service;
-                    countDownLatch.countDown();
-                }
-            };
-            return conn;
-        }
-
-        public void initBinder(Intent intent, ServiceConnection connection) throws InterruptedException {
-            context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
-            try {
-                countDownLatch.await((timeout > 0)? timeout: 3000, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                throw new InterruptedException(e.getMessage());
-            }
+        public AidlUtils build() {
+            return new AidlUtils(this);
         }
     }
 }
